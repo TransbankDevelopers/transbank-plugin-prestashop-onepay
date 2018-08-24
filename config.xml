@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>onepay</name>
+	<displayName><![CDATA[Onepay]]></displayName>
+	<version><![CDATA[1.0.0]]></version>
+	<description><![CDATA[¡Paga con Onepay! Podrás comprar con tus tarjetas de crédito escaneando el código QR, o ingresando el código de compra.]]></description>
+	<author><![CDATA[Transbank]]></author>
+	<tab><![CDATA[payments_gateways]]></tab>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+</module>
