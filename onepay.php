@@ -145,6 +145,18 @@ class Onepay extends PaymentModule
      */
     protected function getConfigForm()
     {
+
+        $options = array(
+            array(
+              'id_option' => "TEST",
+              'name' => $this->l('Integración')
+            ),
+            array(
+              'id_option' => "LIVE",
+              'name' => $this->l('Producción')
+            ),
+          );
+
         return array(
             'form' => array(
                 'legend' => array(
@@ -154,39 +166,56 @@ class Onepay extends PaymentModule
                 'input' => array(
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Live mode'),
+                        'label' => $this->l('Activación'),
                         'name' => 'ONEPAY_LIVE_MODE',
                         'is_bool' => true,
-                        'desc' => $this->l('Use this module in live mode'),
+                        'desc' => $this->l('Activa o desactiva el medio de pago'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',
                                 'value' => true,
-                                'label' => $this->l('Enabled')
+                                'label' => $this->l('Activado')
                             ),
                             array(
                                 'id' => 'active_off',
                                 'value' => false,
-                                'label' => $this->l('Disabled')
+                                'label' => $this->l('Desactivado')
                             )
                         ),
                     ),
                     array(
-                        'col' => 3,
+                        'col' => 5,
                         'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'ONEPAY_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
+                        'prefix' => '<i class="icon icon-user"></i>',
+                        'desc' => $this->l('Ingresa el APIKey entregada'),
+                        'name' => 'ONEPAY_APIKEY',
+                        'label' => $this->l('APIKey'),
                     ),
                     array(
-                        'type' => 'password',
-                        'name' => 'ONEPAY_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
+                        'col' => 5,
+                        'type' => 'text',
+                        'prefix' => '<i class="icon icon-user"></i>',
+                        'desc' => $this->l('Ingresa la Shared Secret'),
+                        'name' => 'ONEPAY_SHARED_SECRET',
+                        'label' => $this->l('Shared Secret'),
+                    ),
+                    array(
+                        'col' => 5,
+                        'type' => 'select',
+                        'required' => true,
+                        'prefix' => '<i class="icon icon-cloud"></i>',
+                        'desc' => $this->l('Selecciona el ambiente de conexión'),
+                        'name' => 'ONEPAY_ENDPOINT',
+                        'label' => $this->l('Endpoint'),
+                        'options' => array(
+                            'query' => $options,
+                            'id' => 'id_option',
+                            'name' => 'name'
+                          )
                     ),
                 ),
                 'submit' => array(
-                    'title' => $this->l('Save'),
+                    'title' => $this->l('Guardar'),
                 ),
             ),
         );
@@ -199,8 +228,9 @@ class Onepay extends PaymentModule
     {
         return array(
             'ONEPAY_LIVE_MODE' => Configuration::get('ONEPAY_LIVE_MODE', true),
-            'ONEPAY_ACCOUNT_EMAIL' => Configuration::get('ONEPAY_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'ONEPAY_ACCOUNT_PASSWORD' => Configuration::get('ONEPAY_ACCOUNT_PASSWORD', null),
+            'ONEPAY_APIKEY' => Configuration::get('ONEPAY_APIKEY', null),
+            'ONEPAY_SHARED_SECRET' => Configuration::get('ONEPAY_SHARED_SECRET', null),
+            'ONEPAY_ENDPOINT' => Configuration::get('ONEPAY_ENDPOINT', null),
         );
     }
 
