@@ -40,6 +40,8 @@ class Onepay extends PaymentModule
         $this->author = 'Transbank';
         $this->need_instance = 0;
 
+        $this->controllers = array('transaction', 'commit');
+
         /**
          * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
          */
@@ -83,7 +85,21 @@ class Onepay extends PaymentModule
             $this->registerHook('header') &&
             $this->registerHook('backOfficeHeader') &&
             $this->registerHook('payment') &&
+            $this->registerHook('moduleRoutes') &&
+            $this->registerHook('header') &&
             $this->registerHook('paymentReturn');
+    }
+
+    public function hookDisplayHeader() {    
+        return '<script type="text/javascript"> ' .
+        'window.transaction_url="' . $this->context->link->getModuleLink("onepay", "transaction", []) . '";' .
+        'window.commit_url="' . $this->context->link->getModuleLink("onepay", "commit", []) . '";' .
+        '</script>';
+    }
+
+    public function hookModuleRoutes()
+    {
+        require_once __DIR__.'/vendor/autoload.php'; // This way you can autoload dependencies on all your custom classes
     }
 
     public function uninstall()
