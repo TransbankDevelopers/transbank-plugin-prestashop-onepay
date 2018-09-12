@@ -326,7 +326,7 @@ class Onepay extends PaymentModule
         if ($this->active == false)
             return;
 
-        $order = $params['objOrder'];
+        $order = $params['order'];
 
         if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR'))
             $this->smarty->assign('status', 'ok');
@@ -335,7 +335,9 @@ class Onepay extends PaymentModule
             'id_order' => $order->id,
             'reference' => $order->reference,
             'params' => $params,
-            'total' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
+            'shop_name' => $this->context->shop->name,
+            'info' => json_decode(current(Message::getMessagesByOrderId($order->id, true))['message']),
+            'total' => Tools::displayPrice($order->getOrdersTotalPaid(), new Currency($order->id_currency), false),
         ));
 
         return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
