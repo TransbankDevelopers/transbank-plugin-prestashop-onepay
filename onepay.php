@@ -95,7 +95,7 @@ class Onepay extends PaymentModule
 
     public function hookPaymentOptions($params)
     {
-        if (!$this->active) {
+        if (!$this->active || !Configuration::get('ONEPAY_LIVE_MODE', false) || !Configuration::get('ONEPAY_APIKEY', null) || !Configuration::get('ONEPAY_APIKEY', null)) {
             return;
         }
 
