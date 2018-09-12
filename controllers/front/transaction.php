@@ -22,14 +22,14 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
             $ps_products = $ps_cart->getProducts(true);
 
             $ps_summary = $ps_cart->getSummaryDetails();
-            $ps_shipping_price = intval($ps_summary['total_shipping']);
+            $ps_shipping_price = (int) round($ps_summary['total_shipping']);
 
             $carro = new ShoppingCart();
 
             foreach($ps_products as $product) {
                 $nombre = strval($product['name']);
                 $cantidad = intval($product['cart_quantity']);
-                $precio = intval($product['price_wt']);
+                $precio = (int) round($product['price_wt']);
 
                 $item = new Item($nombre, $cantidad, $precio);
                 $carro->add($item);
