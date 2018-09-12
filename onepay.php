@@ -54,9 +54,9 @@ class Onepay extends PaymentModule
         $this->displayName = $this->l('Onepay');
         $this->description = $this->l('¡Paga con Onepay! Podrás comprar con tus tarjetas de crédito escaneando el código QR, o ingresando el código de compra.');
 
-        $this->limited_countries = array('FR');
+        $this->limited_countries = array('CL');
 
-        $this->limited_currencies = array('EUR');
+        $this->limited_currencies = array('CLP');
 
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
     }
