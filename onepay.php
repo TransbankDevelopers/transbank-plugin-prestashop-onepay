@@ -40,7 +40,7 @@ class Onepay extends PaymentModule
         $this->author = 'Transbank';
         $this->need_instance = 0;
 
-        $this->controllers = array('transaction', 'commit');
+        $this->controllers = array('transaction', 'commit', 'diagnostic');
 
         /**
          * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
@@ -121,11 +121,11 @@ class Onepay extends PaymentModule
             $this->postProcess();
         }
 
-        $this->context->smarty->assign('module_dir', $this->_path);
+        $this->context->smarty->assign(array('module_dir' => $this->_path, 'diagnostic_url' => $this->context->link->getModuleLink($this->name, 'diagnostic', array(), true)));
 
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 
-        return $output.$this->renderForm();
+        return $this->renderForm().$output;
     }
 
     /**

@@ -23,16 +23,15 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
-<!-- Nav tabs -->
-<ul class="nav nav-tabs" role="tablist">
-	<li class="active"><a href="#template_1" role="tab" data-toggle="tab">Template 1</a></li>
-	<li><a href="#template_2" role="tab" data-toggle="tab">Template 2</a></li>
-	<li><a href="#template_3" role="tab" data-toggle="tab">Template 3</a></li>
-</ul>
 
-<!-- Tab panes -->
-<div class="tab-content">
-	<div class="tab-pane active" id="template_1">{include file='./template_1.tpl'}</div>
-	<div class="tab-pane" id="template_2">{include file='./template_2.tpl'}</div>
-	<div class="tab-pane" id="template_3">{include file='./template_3.tpl'}</div>
+<div>
+	<br>
+	<a class="generate-pdf-link"
+		style="text-decoration: none; color: black; border-color: gray; border-style: solid; border-width: thin; padding: 5px; background-image: linear-gradient(#e6e6e6, #FFFFFF); height: 2em; font-weight:  bold; font-size: 1rem;"
+		href="{$diagnostic_url}"
+		target="_blank"
+		rel="noopener"
+		>Generar PDF de Diagnóstico</a>
 </div>
+
+<br>
