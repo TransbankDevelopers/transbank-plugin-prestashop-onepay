@@ -9,7 +9,7 @@ use \Transbank\Onepay\Exceptions\TransbankException;
 
 class OnepayCommitModuleFrontController extends ModuleFrontController
 {
-    public function init() {
+    public function postProcess() {
 
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
@@ -17,10 +17,51 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
             OnepayBase::setApiKey(Configuration::get('ONEPAY_APIKEY', null));
             OnepayBase::setCurrentIntegrationType(Configuration::get('ONEPAY_ENDPOINT', null));
 
-            $this->ajaxDie(json_encode([
-                'success' => true,
-                'operation' => 'get'
-            ]));
+            $externalUniqueNumber = Tools::getValue('externalUniqueNumber');
+            $occ = Tools::getValue('occ');
+
+            try {
+                $transactionCommitResponse = Transaction::commit($occ, $externalUniqueNumber);
+
+                $cart_id=Context::getContext()->cart->id;
+                $secure_key=Context::getContext()->customer->secure_key;
+                $cart = new Cart((int)$cart_id);
+                $customer = new Customer((int)$cart->id_customer);
+
+                $full_response = [];
+                $full_response['occ'] = $transactionCommitResponse->getOcc();
+                $full_response['externalUniqueNumber'] = $externalUniqueNumber;
+                $full_response['authorizationCode'] = $transactionCommitResponse->getOcc();
+                $full_response['buyOrder'] = $transactionCommitResponse->getBuyOrder();
+                $full_response['description'] = $transactionCommitResponse->getDescription();
+                $full_response['amount'] = $transactionCommitResponse->getAmount();
+                $full_response['installmentsNumber'] = $transactionCommitResponse->getInstallmentsNumber();
+                $full_response['installmentsAmount'] = $transactionCommitResponse->getInstallmentsAmount();
+                $full_response['issuedAt'] = $transactionCommitResponse->getIssuedAt();
+
+                $payment_status = Configuration::get('PS_OS_PAYMENT');
+                $message = json_encode($full_response);
+
+                $module_name = $this->module->displayName;
+                $currency_id = (int)Context::getContext()->currency->id;
+                $this->module->validateOrder($cart_id, $payment_status, $cart->getOrderTotal(), $module_name, $message, array(), $currency_id, false, $secure_key);
+
+                $order_id = Order::getOrderByCartId((int)$cart->id);
+                if ($order_id && ($secure_key == $customer->secure_key)) {
+                    $module_id = $this->module->id;
+                    Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart_id.'&id_module='.$module_id.'&id_order='.$order_id.'&key='.$secure_key);
+                } else {
+                    return $this->setTemplate('module:onepay/views/templates/front/error.tpl');
+                }
+            }
+            catch (TransbankException $transbank_exception) {
+                PrestaShopLogger::addLog("Confirmación de transacción fallida: ".$transbank_exception->getMessage(), 3, null, null, null, true, null);
+                return $this->setTemplate('module:onepay/views/templates/front/error.tpl');
+                $this->ajaxDie(json_encode([
+                    'success' => false
+                ]));
+            }
+
         } else {
             $this->ajaxDie(json_encode([
                 'success' => false
