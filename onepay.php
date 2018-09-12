@@ -28,6 +28,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+
 class Onepay extends PaymentModule
 {
     protected $config_form = false;
@@ -84,13 +86,31 @@ class Onepay extends PaymentModule
         return parent::install() &&
             $this->registerHook('header') &&
             $this->registerHook('backOfficeHeader') &&
+            $this->registerHook('paymentOptions') &&
             $this->registerHook('payment') &&
             $this->registerHook('moduleRoutes') &&
             $this->registerHook('header') &&
             $this->registerHook('paymentReturn');
     }
 
+    public function hookPaymentOptions($params)
+    {
+        if (!$this->active) {
+            return;
+        }
+
+        $onepayOption = new PaymentOption();
+        $onepayOption->setCallToActionText($this->l('Pagar con Onepay'))
+                      ->setModuleName('tbk-onepay')
+                      ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true))
+                      ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/logo_onepay.png'));
+
+        return [$onepayOption];
+    }
+
     public function hookDisplayHeader() {    
+        $this->context->controller->addJS($this->_path.'/views/js/front.js');
+
         return '<script type="text/javascript"> ' .
         'window.transaction_url="' . $this->context->link->getModuleLink("onepay", "transaction", []) . '";' .
         'window.commit_url="' . $this->context->link->getModuleLink("onepay", "commit", []) . '";' .
@@ -140,7 +160,6 @@ class Onepay extends PaymentModule
         $helper->module = $this;
         $helper->default_form_language = $this->context->language->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'submitOnepayModule';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
