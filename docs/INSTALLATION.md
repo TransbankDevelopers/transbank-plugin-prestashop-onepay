@@ -10,7 +10,7 @@ Ud. debe tener instalado previamente Prestashop.
 
 ## Instalación de Plugin
 
-1. Dirígete a [https://github.com/TransbankDevelopers/transbank-plugin-prestashop-onepay/releases](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-onepay/releases), y descargue la última versión disponible del plugin.
+1. Dirígete a [https://github.com/TransbankDevelopers/transbank-plugin-prestashop-onepay/releases](https://github.com/TransbankDevelopers/transbank-plugin-prestashop-onepay/releases), y descargue la última versión disponible del plugin.
 
   Una vez descargado el plugin, ingresa a la página de administración de Prestashop (usualmente en _misitio.com_/admin), y dirígete a Módulos, Módulos y Servicios, indicado a continuación:
 
@@ -94,7 +94,7 @@ En ambiente de integración es posible realizar una pruebas de transacción util
 * Si todo va bien, el emulador mostrará opciones para simular situaciones distintas. Para simular un pago exitoso, presiona el botón `PRE_AUTHORIZED`. En caso de querer simular un pago fallido, presiona le botón `REJECTED`. Simularemos un pago exitóso presionando el botón `PRE_AUTHORIZED`.
   ![Paso 8](img/emu8.png)
   
-* Vuelve a la ventana del navegador donde se encuentra WooCommerce, y podrás comprobar que el pago ha sido exitoso.
+* Vuelve a la ventana del navegador donde se encuentra Prestashop, y podrás comprobar que el pago ha sido exitoso.
  ![Paso 9](img/emu9.png)
 
 * Automáticamente serás redirigido a Prestashop, con la comprobación final del pago.
