@@ -4,6 +4,7 @@ use Transbank\Onepay\OnepayBase;
 use Transbank\Onepay\ShoppingCart;
 use Transbank\Onepay\Item;
 use Transbank\Onepay\Transaction;
+use Transbank\Onepay\Options;
 use \Transbank\Onepay\Exceptions\TransactionCreateException;
 use \Transbank\Onepay\Exceptions\TransbankException;
 
@@ -13,9 +14,11 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
         parent::initContent();
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $endpoint = Configuration::get('ONEPAY_ENDPOINT', null);
+
             OnepayBase::setSharedSecret(Configuration::get('ONEPAY_SHARED_SECRET', null));
             OnepayBase::setApiKey(Configuration::get('ONEPAY_APIKEY', null));
-            OnepayBase::setCurrentIntegrationType(Configuration::get('ONEPAY_ENDPOINT', null));
+            OnepayBase::setCurrentIntegrationType($endpoint);
             
             $ps_cart = $this->context->cart;
 
@@ -41,7 +44,13 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
             }
 
             try {
-                $transaction = Transaction::create($carro);
+                $options = new Options();
+
+                if ($endpoint == "LIVE") {
+                    $options->setAppKey("C7EE0F59-9353-408B-B81C-E1E8F08305FF");
+                }
+
+                $transaction = Transaction::create($carro, null, null, $options);
                 $this->ajaxDie(json_encode([
                     'occ' => $transaction->getOcc(),
                     'ott' => $transaction->getOtt(),

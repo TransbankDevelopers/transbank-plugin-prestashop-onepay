@@ -4,6 +4,7 @@ use Transbank\Onepay\OnepayBase;
 use Transbank\Onepay\ShoppingCart;
 use Transbank\Onepay\Item;
 use Transbank\Onepay\Transaction;
+use Transbank\Onepay\Options;
 use \Transbank\Onepay\Exceptions\TransactionCreateException;
 use \Transbank\Onepay\Exceptions\TransbankException;
 
@@ -12,16 +13,22 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
     public function postProcess() {
 
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-
+            $endpoint = Configuration::get('ONEPAY_ENDPOINT', null);
             OnepayBase::setSharedSecret(Configuration::get('ONEPAY_SHARED_SECRET', null));
             OnepayBase::setApiKey(Configuration::get('ONEPAY_APIKEY', null));
-            OnepayBase::setCurrentIntegrationType(Configuration::get('ONEPAY_ENDPOINT', null));
+            OnepayBase::setCurrentIntegrationType($endpoint);
 
             $externalUniqueNumber = Tools::getValue('externalUniqueNumber');
             $occ = Tools::getValue('occ');
 
             try {
-                $transactionCommitResponse = Transaction::commit($occ, $externalUniqueNumber);
+                $options = new Options();
+
+                if ($endpoint == "LIVE") {
+                    $options->setAppKey("C7EE0F59-9353-408B-B81C-E1E8F08305FF");
+                }
+
+                $transactionCommitResponse = Transaction::commit($occ, $externalUniqueNumber, $options);
 
                 $cart_id=Context::getContext()->cart->id;
                 $secure_key=Context::getContext()->customer->secure_key;
