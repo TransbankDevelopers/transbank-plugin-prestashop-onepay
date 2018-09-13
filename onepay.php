@@ -102,8 +102,7 @@ class Onepay extends PaymentModule
         $onepayOption = new PaymentOption();
         $onepayOption->setCallToActionText($this->l('Pagar con Onepay'))
                       ->setModuleName('tbk-onepay')
-                      ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true))
-                      ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/logo_onepay.png'));
+                      ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true));
 
         return [$onepayOption];
     }
