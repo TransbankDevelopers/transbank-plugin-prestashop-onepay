@@ -10,6 +10,6 @@ mkdir .onepay
 cp -R * .onepay
 mv .onepay onepay 
 
-zip -r9 "onepay-$TRAVIS_TAG.zip" onepay -x composer.json composer.lock docker-compose.yml docs/\* package.sh README.md
+zip -r9 "onepay-$TRAVIS_TAG.zip" onepay -x onepay/composer.json onepay/composer.lock onepay/docker-compose.yml onepay/docs/\* onepay/package.sh README.md
 
 rm -Rf onepay
