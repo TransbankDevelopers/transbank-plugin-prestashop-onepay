@@ -1,32 +1,10 @@
 <?php
-/**
-* 2007-2018 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2018 PrestaShop SA
-*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 class Onepay extends PaymentModule
 {
@@ -40,6 +18,8 @@ class Onepay extends PaymentModule
         $this->author = 'Transbank';
         $this->need_instance = 0;
 
+        $this->controllers = array('transaction', 'commit', 'diagnostic');
+
         /**
          * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
          */
@@ -50,9 +30,9 @@ class Onepay extends PaymentModule
         $this->displayName = $this->l('Onepay');
         $this->description = $this->l('¡Paga con Onepay! Podrás comprar con tus tarjetas de crédito escaneando el código QR, o ingresando el código de compra.');
 
-        $this->limited_countries = array('FR');
+        $this->limited_countries = array('CL');
 
-        $this->limited_currencies = array('EUR');
+        $this->limited_currencies = array('CLP');
 
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
     }
@@ -82,8 +62,39 @@ class Onepay extends PaymentModule
         return parent::install() &&
             $this->registerHook('header') &&
             $this->registerHook('backOfficeHeader') &&
+            $this->registerHook('paymentOptions') &&
             $this->registerHook('payment') &&
+            $this->registerHook('moduleRoutes') &&
+            $this->registerHook('header') &&
             $this->registerHook('paymentReturn');
+    }
+
+    public function hookPaymentOptions($params)
+    {
+        if (!$this->active || !Configuration::get('ONEPAY_LIVE_MODE', false) || !Configuration::get('ONEPAY_APIKEY', null) || !Configuration::get('ONEPAY_APIKEY', null)) {
+            return;
+        }
+
+        $onepayOption = new PaymentOption();
+        $onepayOption->setCallToActionText($this->l('Pagar con Onepay'))
+                      ->setModuleName('tbk-onepay')
+                      ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true));
+
+        return [$onepayOption];
+    }
+
+    public function hookDisplayHeader() {    
+        $this->context->controller->addJS($this->_path.'/views/js/front.js');
+
+        return '<script type="text/javascript"> ' .
+        'window.transaction_url="' . $this->context->link->getModuleLink("onepay", "transaction", []) . '";' .
+        'window.commit_url="' . $this->context->link->getModuleLink("onepay", "commit", []) . '";' .
+        '</script>';
+    }
+
+    public function hookModuleRoutes()
+    {
+        require_once __DIR__.'/vendor/autoload.php'; // This way you can autoload dependencies on all your custom classes
     }
 
     public function uninstall()
@@ -105,11 +116,11 @@ class Onepay extends PaymentModule
             $this->postProcess();
         }
 
-        $this->context->smarty->assign('module_dir', $this->_path);
+        $this->context->smarty->assign(array('module_dir' => $this->_path, 'diagnostic_url' => $this->context->link->getModuleLink($this->name, 'diagnostic', array(), true)));
 
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 
-        return $output.$this->renderForm();
+        return $this->renderForm().$output;
     }
 
     /**
@@ -124,7 +135,6 @@ class Onepay extends PaymentModule
         $helper->module = $this;
         $helper->default_form_language = $this->context->language->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'submitOnepayModule';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
@@ -145,6 +155,18 @@ class Onepay extends PaymentModule
      */
     protected function getConfigForm()
     {
+
+        $options = array(
+            array(
+              'id_option' => "TEST",
+              'name' => $this->l('Integración')
+            ),
+            array(
+              'id_option' => "LIVE",
+              'name' => $this->l('Producción')
+            ),
+          );
+
         return array(
             'form' => array(
                 'legend' => array(
@@ -154,39 +176,56 @@ class Onepay extends PaymentModule
                 'input' => array(
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Live mode'),
+                        'label' => $this->l('Activar Onepay'),
                         'name' => 'ONEPAY_LIVE_MODE',
                         'is_bool' => true,
-                        'desc' => $this->l('Use this module in live mode'),
+                        'desc' => $this->l('Activa o desactiva el medio de pago'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',
                                 'value' => true,
-                                'label' => $this->l('Enabled')
+                                'label' => $this->l('Activado')
                             ),
                             array(
                                 'id' => 'active_off',
                                 'value' => false,
-                                'label' => $this->l('Disabled')
+                                'label' => $this->l('Desactivado')
                             )
                         ),
                     ),
                     array(
-                        'col' => 3,
+                        'col' => 5,
                         'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'ONEPAY_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
+                        'prefix' => '<i class="icon icon-user"></i>',
+                        'desc' => $this->l('Ingresa el APIKey entregada'),
+                        'name' => 'ONEPAY_APIKEY',
+                        'label' => $this->l('APIKey'),
                     ),
                     array(
-                        'type' => 'password',
-                        'name' => 'ONEPAY_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
+                        'col' => 5,
+                        'type' => 'text',
+                        'prefix' => '<i class="icon icon-user"></i>',
+                        'desc' => $this->l('Ingresa la Shared Secret'),
+                        'name' => 'ONEPAY_SHARED_SECRET',
+                        'label' => $this->l('Shared Secret'),
+                    ),
+                    array(
+                        'col' => 5,
+                        'type' => 'select',
+                        'required' => true,
+                        'prefix' => '<i class="icon icon-cloud"></i>',
+                        'desc' => $this->l('Selecciona el ambiente de conexión'),
+                        'name' => 'ONEPAY_ENDPOINT',
+                        'label' => $this->l('Endpoint'),
+                        'options' => array(
+                            'query' => $options,
+                            'id' => 'id_option',
+                            'name' => 'name'
+                          )
                     ),
                 ),
                 'submit' => array(
-                    'title' => $this->l('Save'),
+                    'title' => $this->l('Guardar'),
                 ),
             ),
         );
@@ -199,8 +238,9 @@ class Onepay extends PaymentModule
     {
         return array(
             'ONEPAY_LIVE_MODE' => Configuration::get('ONEPAY_LIVE_MODE', true),
-            'ONEPAY_ACCOUNT_EMAIL' => Configuration::get('ONEPAY_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'ONEPAY_ACCOUNT_PASSWORD' => Configuration::get('ONEPAY_ACCOUNT_PASSWORD', null),
+            'ONEPAY_APIKEY' => Configuration::get('ONEPAY_APIKEY', null),
+            'ONEPAY_SHARED_SECRET' => Configuration::get('ONEPAY_SHARED_SECRET', null),
+            'ONEPAY_ENDPOINT' => Configuration::get('ONEPAY_ENDPOINT', null),
         );
     }
 
@@ -261,7 +301,7 @@ class Onepay extends PaymentModule
         if ($this->active == false)
             return;
 
-        $order = $params['objOrder'];
+        $order = $params['order'];
 
         if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR'))
             $this->smarty->assign('status', 'ok');
@@ -270,7 +310,9 @@ class Onepay extends PaymentModule
             'id_order' => $order->id,
             'reference' => $order->reference,
             'params' => $params,
-            'total' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
+            'shop_name' => $this->context->shop->name,
+            'info' => json_decode(current(Message::getMessagesByOrderId($order->id, true))['message']),
+            'total' => Tools::displayPrice($order->getOrdersTotalPaid(), new Currency($order->id_currency), false),
         ));
 
         return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
