@@ -201,7 +201,7 @@ class Onepay extends PaymentModule
                 'input' => array(
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Activación'),
+                        'label' => $this->l('Activar Onepay'),
                         'name' => 'ONEPAY_LIVE_MODE',
                         'is_bool' => true,
                         'desc' => $this->l('Activa o desactiva el medio de pago'),
