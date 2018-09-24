@@ -10,7 +10,7 @@ before_deploy:
 deploy:
   provider: releases
   name: "$TRAVIS_TAG"
-  file: "onepay-$TRAVIS_TAG.zip"
+  file: "plugin-prestashop-onepay-$TRAVIS_TAG.zip"
   skip_cleanup: true
   api_key:
     secure: B7ybpultrRJ6931JCm2A6u92gdJ+1kEvSG1CiWfHg1HH2IPPcVdQ7/85xQIINslqbpn5/qp2sc8i/lp1ZEH0v4MjbEHuGJvBgRh2Czk4v3lvDv/Nbd1vm7b8VtyugVFVKd68tggAf/vrFd+BBnil75NxeCNVsts9OrUgV96qF/m6BGro8pq1zxxILITpRH6H1tAzXHO6GwiTEtTDaE/gGhEEGaEdI0bog3/PtvqNnjFQR5jSiiJP725ttFLRxmaNiuR3A4mARk+rM2ObdyzKkBVzaw0HMbJZNfUOEFMQewUV1OwpD/7uE68uu3vi+KhaawqmD1K7HJ2DiQLhZYYSrfpLZ2+8fMT40m0yiNbPMiBAI1ThYFi2aTF5lHKYyRs+YiL3cM3tHBMxPFSZpnPMYWFV0c66M89ZIl5J0mGy0npylBz6+/RJ/YIPzC3z7Zw7gAjhHLaQpAMgmCFxySbuyAJDu8V122cO4Xw9NHG7EyWbfNsoREFebEgrIkZGG+yIGqjL2rs8imwZQmFR7H73EmNZIlkIy4Kd4ZalkpOWaK4rpHW2wsKfwAF2xMUtaXnRy0CI5JbEOs4Iv63Zp8ZCxg+Az0sUiKF/jcRKkjZk4ATR87L68aIkm3Z52A39mHb1XVRpfFZvhPt9LqZHzJZIyjt3qAri6ADsIGlzfxLttpI=
