@@ -78,7 +78,7 @@ class Onepay extends PaymentModule
         $onepayOption = new PaymentOption();
         $onepayOption->setCallToActionText($this->l('Pagar con Onepay'))
                       ->setModuleName('tbk-onepay')
-                      ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true));
+                      ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), null, null, null, true));
 
         return [$onepayOption];
     }
@@ -87,8 +87,8 @@ class Onepay extends PaymentModule
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
 
         return '<script type="text/javascript"> ' .
-        'window.transaction_url="' . $this->context->link->getModuleLink("onepay", "transaction", []) . '";' .
-        'window.commit_url="' . $this->context->link->getModuleLink("onepay", "commit", []) . '";' .
+        'window.transaction_url="' . $this->context->link->getModuleLink("onepay", "transaction", array(), null, null, null, true) . '";' .
+        'window.commit_url="' . $this->context->link->getModuleLink("onepay", "commit", array(), null, null, null, true) . '";' .
         '</script>';
     }
 
@@ -116,7 +116,7 @@ class Onepay extends PaymentModule
             $this->postProcess();
         }
 
-        $this->context->smarty->assign(array('module_dir' => $this->_path, 'diagnostic_url' => $this->context->link->getModuleLink($this->name, 'diagnostic', array(), true)));
+        $this->context->smarty->assign(array('module_dir' => $this->_path, 'diagnostic_url' => $this->context->link->getModuleLink($this->name, 'diagnostic', array(), null, null, null, true)));
 
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 
