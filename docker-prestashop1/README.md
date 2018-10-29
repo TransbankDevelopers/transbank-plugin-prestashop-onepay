@@ -60,3 +60,11 @@ Para instalar Prestashop, hacer lo siguiente:
     user: onepay@onepay.com
     password: onepay
 
+
+### Importante
+
+Debes configurar el transportista en (Transporte / Transportistas) modificando "My carrier" para enviar a "South America", ejemplo agregando un costo de $5.
+
+![transporte1](img/transporte1.png)
+
+![transporte2](img/transporte2.png)
