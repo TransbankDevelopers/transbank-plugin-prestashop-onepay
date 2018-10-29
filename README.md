@@ -25,7 +25,7 @@ Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.o
 
 ## Nota  
 - La versión del sdk de php se encuentra en el archivo `composer.json`
-- La versión del sdk de javascript se encuentra en el archivo `public/js/onepay-public.js`
+- La versión del sdk de javascript se encuentra en el archivo `views/js/front.js`
 
 ## Desarrollo
 
