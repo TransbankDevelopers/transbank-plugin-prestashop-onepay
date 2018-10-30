@@ -23,7 +23,7 @@ services:
     depends_on:
       - mariadb
     volumes:
-    - .:/var/www/html/modules/onepay
+    - ..:/var/www/html/modules/onepay
   mariadb:
     image: mariadb
     container_name: onepay_mariadb
