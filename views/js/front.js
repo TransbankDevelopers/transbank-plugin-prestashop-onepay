@@ -20,7 +20,7 @@
         var t = n.getElementsByTagName("script")[0];
         p = t.parentNode;
         p.insertBefore(s, t);
-    })(false, document, "https://cdn.rawgit.com/TransbankDevelopers/transbank-sdk-js-onepay/v1.5.9/lib/merchant.onepay.js",
+    })(false, document, "https://unpkg.com/transbank-onepay-frontend-sdk@1.5/lib/merchant.onepay.min.js",
         "script",window, function () {
             console.log("Onepay JS library successfully loaded.");
 
