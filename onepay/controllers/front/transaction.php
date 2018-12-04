@@ -13,6 +13,25 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
     public function initContent() {
         parent::initContent();
 
+        if (isset($_GET['config']) && $_GET['config'] == 'true') {
+
+            $ps_cart = $this->context->cart;
+            $ps_products = $ps_cart->getProducts(true);
+
+            $transactionDescription = '';
+
+            if (count($ps_products) == 1) {
+                $transactionDescription = strval($ps_products[0]['name']);
+            }
+
+            $response = array(
+                'transactionDescription' => $transactionDescription
+            );
+
+            $this->ajaxDie(json_encode($response));
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $endpoint = Configuration::get('ONEPAY_ENDPOINT', null);

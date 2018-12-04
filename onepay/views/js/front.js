@@ -29,15 +29,20 @@
 
                 if (myPaymentMethodSelected) {
 
-                    var options = {
-                        endpoint: transaction_url,
-                        callbackUrl: commit_url
-                    };
+                    $.getJSON(transaction_url + '?config=true', function(config) {
 
-                    if (prestashop.shop.logo) {
-                        options.commerceLogo = window.location.origin + prestashop.shop.logo;
-                    }
-                    Onepay.checkout(options);
+                        var options = {
+                            endpoint: transaction_url,
+                            callbackUrl: commit_url,
+                            transactionDescription: config.transactionDescription || ''
+                        };
+
+                        if (prestashop.shop.logo) {
+                            options.commerceLogo = window.location.origin + prestashop.shop.logo;
+                        }
+    
+                        Onepay.checkout(options);
+                    });
                 }
                  return false;
             });
