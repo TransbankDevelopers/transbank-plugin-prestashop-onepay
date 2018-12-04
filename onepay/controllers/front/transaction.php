@@ -14,11 +14,15 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
         parent::initContent();
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
             $endpoint = Configuration::get('ONEPAY_ENDPOINT', null);
+
+            $callbackUrl = Context::getContext()->link->getModuleLink('onepay', 'commit', array(), true);
 
             OnepayBase::setSharedSecret(Configuration::get('ONEPAY_SHARED_SECRET', null));
             OnepayBase::setApiKey(Configuration::get('ONEPAY_APIKEY', null));
             OnepayBase::setCurrentIntegrationType($endpoint);
+            OnepayBase::setCallbackUrl($callbackUrl);
             
             $ps_cart = $this->context->cart;
 
@@ -58,11 +62,12 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
                     'qrCodeAsBase64' => $transaction->getQrCodeAsBase64(),
                     'issuedAt' => $transaction->getIssuedAt(),
                     'signature' => $transaction->getSignature(),
-                    'amount' => $carro->getTotal()
+                    'amount' => $carro->getTotal(),
+                    'callbackUrl' => $callbackUrl
                 ]));
 
             } catch (TransbankException $transbank_exception) {
-                $msg =  $transbank_exception->getMessage();
+                $msg = $transbank_exception->getMessage();
                 PrestaShopLogger::addLog("Creación de Transacción fallida: ".$msg, 3, null, null, null, true, null);
                 $this->ajaxDie(json_encode([
                     'success' => false
