@@ -13,7 +13,9 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
     public function postProcess() {
 
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+
             $endpoint = Configuration::get('ONEPAY_ENDPOINT', null);
+            
             OnepayBase::setSharedSecret(Configuration::get('ONEPAY_SHARED_SECRET', null));
             OnepayBase::setApiKey(Configuration::get('ONEPAY_APIKEY', null));
             OnepayBase::setCurrentIntegrationType($endpoint);
