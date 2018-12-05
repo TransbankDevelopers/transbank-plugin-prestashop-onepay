@@ -6,7 +6,7 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 
 ## [1.0.7] - 2018-12-04
 ### Fixed
-- Corrige configuraciones internas.
+- Corrige compatibilidad con la app de Onepay cuando se compra mediante un dispositivo móvil.
 ### Added
 - Agrega uso de `transactionDescription` cuando el carro tiene un item.
 
