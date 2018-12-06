@@ -15,15 +15,18 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
             $endpoint = Configuration::get('ONEPAY_ENDPOINT', null);
+            $apiKey = Configuration::get('ONEPAY_APIKEY', null);
+            $sharedSecret = Configuration::get('ONEPAY_SHARED_SECRET', null);
             
-            OnepayBase::setSharedSecret(Configuration::get('ONEPAY_SHARED_SECRET', null));
-            OnepayBase::setApiKey(Configuration::get('ONEPAY_APIKEY', null));
+            OnepayBase::setApiKey($apiKey);
+            OnepayBase::setSharedSecret($sharedSecret);
             OnepayBase::setCurrentIntegrationType($endpoint);
 
             $externalUniqueNumber = Tools::getValue('externalUniqueNumber');
             $occ = Tools::getValue('occ');
 
             try {
+
                 $options = new Options();
 
                 if ($endpoint == "LIVE") {
