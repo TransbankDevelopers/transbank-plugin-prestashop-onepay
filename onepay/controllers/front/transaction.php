@@ -70,7 +70,7 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
 
             try {
 
-                $options = new Options($apiKey, $sharedSecret);
+                $options = new Options();
 
                 if ($endpoint == "LIVE") {
                     $options->setAppKey("C7EE0F59-9353-408B-B81C-E1E8F08305FF");
