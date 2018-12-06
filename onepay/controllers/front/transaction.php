@@ -34,12 +34,14 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
+            $channel = isset($_POST['channel']) ? $_POST['channel'] : null;
             $endpoint = Configuration::get('ONEPAY_ENDPOINT', null);
-
+            $apiKey = Configuration::get('ONEPAY_APIKEY', null);
+            $sharedSecret = Configuration::get('ONEPAY_SHARED_SECRET', null);
             $callbackUrl = Context::getContext()->link->getModuleLink('onepay', 'commit', array(), true);
 
-            OnepayBase::setSharedSecret(Configuration::get('ONEPAY_SHARED_SECRET', null));
-            OnepayBase::setApiKey(Configuration::get('ONEPAY_APIKEY', null));
+            OnepayBase::setApiKey($apiKey);
+            OnepayBase::setSharedSecret($sharedSecret);
             OnepayBase::setCurrentIntegrationType($endpoint);
             OnepayBase::setCallbackUrl($callbackUrl);
             
@@ -67,13 +69,14 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
             }
 
             try {
-                $options = new Options();
+
+                $options = new Options($apiKey, $sharedSecret);
 
                 if ($endpoint == "LIVE") {
                     $options->setAppKey("C7EE0F59-9353-408B-B81C-E1E8F08305FF");
                 }
 
-                $transaction = Transaction::create($carro, null, null, $options);
+                $transaction = Transaction::create($carro, $channel, $options);
                 $this->ajaxDie(json_encode([
                     'occ' => $transaction->getOcc(),
                     'ott' => $transaction->getOtt(),
