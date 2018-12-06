@@ -4,6 +4,10 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2018-12-06
+### Fixed
+- Corrige compatibilidad con la app de Onepay cuando se compra mediante un dispositivo móvil y PC.
+
 ## [1.0.7] - 2018-12-04
 ### Fixed
 - Corrige compatibilidad con la app de Onepay cuando se compra mediante un dispositivo móvil.
