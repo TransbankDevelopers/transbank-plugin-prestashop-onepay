@@ -68,3 +68,15 @@ Debes configurar el transportista en (Transporte / Transportistas) modificando "
 ![transporte1](img/transporte1.png)
 
 ![transporte2](img/transporte2.png)
+
+## Extras para usar ngrok y probar en dominio virtual especialmente para emular producción
+
+1.- Ejecutar ngrok y obtener la url dada por ngrok en `Forwarding` http
+
+    ngrok http 8080
+
+2.- Modificar el archivo `docker-composer.yml` y reconstruir el docker
+
+    PS_DOMAIN=URL_DADA_POR_NGROK
+
+    Ej: PS_DOMAIN==c0c8db10.ngrok.io
