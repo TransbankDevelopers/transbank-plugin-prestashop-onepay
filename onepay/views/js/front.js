@@ -23,28 +23,25 @@
     })(false, document, "https://unpkg.com/transbank-onepay-frontend-sdk@1.5/lib/merchant.onepay.min.js",
         "script",window, function () {
 
-            $('#payment-confirmation > .ps-shown-by-js > button').click(function(e) {
+            $('#onepay_place_order').unbind('click').click(function(e) {
 
-                var myPaymentMethodSelected = $('.payment-options').find("input[data-module-name='tbk-onepay']").is(':checked');
+                $.getJSON(transaction_url + '?config=true', function(config) {
 
-                if (myPaymentMethodSelected) {
+                    var options = {
+                        endpoint: transaction_url,
+                        callbackUrl: commit_url,
+                        transactionDescription: config.transactionDescription || ''
+                    };
 
-                    $.getJSON(transaction_url + '?config=true', function(config) {
-
-                        var options = {
-                            endpoint: transaction_url,
-                            callbackUrl: commit_url,
-                            transactionDescription: config.transactionDescription || ''
-                        };
-
-                        if (prestashop.shop.logo) {
+                    if (typeof prestashop !== 'undefined') {
+                        if (prestashop && prestashop.shop && prestashop.shop.logo) {
                             options.commerceLogo = window.location.origin + prestashop.shop.logo;
                         }
-    
-                        Onepay.checkout(options);
-                    });
-                }
-                 return false;
+                    }
+
+                    Onepay.checkout(options);
+                });
+                return false;
             });
         });
 })( jQuery );

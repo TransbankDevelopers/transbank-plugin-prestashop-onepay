@@ -8,6 +8,8 @@ use Transbank\Onepay\Options;
 use \Transbank\Onepay\Exceptions\TransactionCreateException;
 use \Transbank\Onepay\Exceptions\TransbankException;
 
+require_once(_PS_MODULE_DIR_.'onepay/libs/OnepayUtils.php');
+
 class OnepayCommitModuleFrontController extends ModuleFrontController
 {
     public function postProcess() {
@@ -65,21 +67,29 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
                         Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart_id.'&id_module='.$module_id.'&id_order='.$order_id.'&key='.$secure_key);
                     } else {
                         PrestaShopLogger::addLog("Confirmación de transacción fallida: ".$message, 3, null, null, null, true, null);
-                        return $this->setTemplate('module:onepay/views/templates/front/error.tpl');
+                        return $this->showError();
                     }
                 } else {
-                    return $this->setTemplate('module:onepay/views/templates/front/error.tpl');
+                    return $this->showError();
                 }
             }
             catch (TransbankException $transbank_exception) {
                 PrestaShopLogger::addLog("Confirmación de transacción fallida: ".$transbank_exception->getMessage(), 3, null, null, null, true, null);
-                return $this->setTemplate('module:onepay/views/templates/front/error.tpl');
+                return $this->showError();
             }
 
         } else {
             $this->ajaxDie(json_encode([
                 'success' => false
             ]));
+        }
+    }
+
+    private function showError() {
+        if (OnepayUtils::isPrestashop_1_6()) {
+            return $this->setTemplate('error_1.6.tpl');
+        } else {
+            return $this->setTemplate('module:onepay/views/templates/front/error.tpl');
         }
     }
 }
