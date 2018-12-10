@@ -1,4 +1,4 @@
-
+{block name="content"}
 <div class="box cheque-box">
     <h3 class="page-subheading">Pago por Onepay</h3>
     <p>Se realizara la compra a traves de Onepay por un total de ${$amount}</p>
@@ -11,3 +11,4 @@
         <span>Pagar<i class="icon-chevron-right right"></i></span>
     </button>
 </p>
+{/block}
