@@ -6,19 +6,19 @@ if (!defined('_PS_VERSION_')) {
 
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
-class Onepay extends PaymentModule
-{
+class Onepay extends PaymentModule {
+
     protected $config_form = false;
 
-    public function __construct()
-    {
+    public function __construct() {
+
         $this->name = 'onepay';
         $this->tab = 'payments_gateways';
         $this->version = '1.0.0';
         $this->author = 'Transbank';
         $this->need_instance = 0;
 
-        $this->controllers = array('transaction', 'commit', 'diagnostic');
+        $this->controllers = array('payment','transaction', 'commit', 'diagnostic');
 
         /**
          * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
@@ -34,25 +34,23 @@ class Onepay extends PaymentModule
 
         $this->limited_currencies = array('CLP');
 
-        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
 
     /**
      * Don't forget to create update methods if needed:
      * http://doc.prestashop.com/display/PS16/Enabling+the+Auto-Update
      */
-    public function install()
-    {
-        if (extension_loaded('curl') == false)
-        {
+    public function install() {
+
+        if (extension_loaded('curl') == false) {
             $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module');
             return false;
         }
 
         $iso_code = Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT'));
 
-        if (in_array($iso_code, $this->limited_countries) == false)
-        {
+        if (in_array($iso_code, $this->limited_countries) == false) {
             $this->_errors[] = $this->l('This module is not available in your country');
             return false;
         }
@@ -69,46 +67,88 @@ class Onepay extends PaymentModule
             $this->registerHook('paymentReturn');
     }
 
-    public function hookPaymentOptions($params)
-    {
-        if (!$this->active || !Configuration::get('ONEPAY_LIVE_MODE', false) || !Configuration::get('ONEPAY_APIKEY', null) || !Configuration::get('ONEPAY_APIKEY', null)) {
-            return;
-        }
-
-        $onepayOption = new PaymentOption();
-        $onepayOption->setCallToActionText($this->l('Pagar con Onepay'))
-                      ->setModuleName('tbk-onepay')
-                      ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), null, null, null, true));
-
-        return [$onepayOption];
+    public function uninstall() {
+        Configuration::deleteByName('ONEPAY_LIVE_MODE');
+        return parent::uninstall();
     }
 
     public function hookDisplayHeader() {    
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
-
         return '<script type="text/javascript"> ' .
         'window.transaction_url="' . $this->context->link->getModuleLink("onepay", "transaction", array(), null, null, null, true) . '";' .
         'window.commit_url="' . $this->context->link->getModuleLink("onepay", "commit", array(), null, null, null, true) . '";' .
         '</script>';
     }
 
-    public function hookModuleRoutes()
-    {
+    public function hookModuleRoutes() {
         require_once __DIR__.'/vendor/autoload.php'; // This way you can autoload dependencies on all your custom classes
     }
 
-    public function uninstall()
-    {
-        Configuration::deleteByName('ONEPAY_LIVE_MODE');
+    /**
+     * This hook is used to display the order confirmation page.
+     */
+    public function hookPaymentReturn($params) {
 
-        return parent::uninstall();
+        if ($this->active == false)
+            return;
+
+        $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
+
+        $order = $params[$nameOrderRef];
+
+        if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR'))
+            $this->smarty->assign('status', 'ok');
+
+        $this->smarty->assign(array(
+            'id_order' => $order->id,
+            'reference' => $order->reference,
+            'params' => $params,
+            'shop_name' => $this->context->shop->name,
+            'info' => json_decode(current(Message::getMessagesByOrderId($order->id, true))['message']),
+            'total' => Tools::displayPrice($order->getOrdersTotalPaid(), new Currency($order->id_currency), false),
+        ));
+
+        return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
+    }
+
+        /**
+     * This method is used to render the payment button,
+     * Take care if the button should be displayed or not.
+     */
+    public function hookPayment($params) {
+
+        if (!$this->active) {
+            return;
+        }
+
+        $currency_id = $params['cart']->id_currency;
+        $currency = new Currency((int)$currency_id);
+
+        if (in_array($currency->iso_code, $this->limited_currencies) == false)
+            return false;
+
+        Context::getContext()->smarty->assign(array(
+            'logo' => 'https://www.transbankdevelopers.cl/public/library/img/img_onepay.png',
+            'title' => 'Onepay'
+        ));
+        return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
+    }
+
+    public function hookPaymentOptions($params) {
+        if (!$this->active || !Configuration::get('ONEPAY_LIVE_MODE', false) || !Configuration::get('ONEPAY_APIKEY', null) || !Configuration::get('ONEPAY_APIKEY', null)) {
+            return;
+        }
+        $onepayOption = new PaymentOption();
+        $onepayOption->setCallToActionText($this->l('Pagar con Onepay'))
+                      //->setModuleName('tbk-onepay')
+                      ->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), null, null, null, true));
+        return [$onepayOption];
     }
 
     /**
      * Load the configuration form
      */
-    public function getContent()
-    {
+    public function getContent() {
         /**
          * If values have been submitted in the form, process.
          */
@@ -126,8 +166,8 @@ class Onepay extends PaymentModule
     /**
      * Create the form that will be displayed in the configuration of your module.
      */
-    protected function renderForm()
-    {
+    protected function renderForm() {
+
         $helper = new HelperForm();
 
         $helper->show_toolbar = false;
@@ -153,8 +193,7 @@ class Onepay extends PaymentModule
     /**
      * Create the structure of your form.
      */
-    protected function getConfigForm()
-    {
+    protected function getConfigForm() {
 
         $options = array(
             array(
@@ -234,8 +273,7 @@ class Onepay extends PaymentModule
     /**
      * Set values for the inputs.
      */
-    protected function getConfigFormValues()
-    {
+    protected function getConfigFormValues() {
         return array(
             'ONEPAY_LIVE_MODE' => Configuration::get('ONEPAY_LIVE_MODE', true),
             'ONEPAY_APIKEY' => Configuration::get('ONEPAY_APIKEY', null),
@@ -247,8 +285,7 @@ class Onepay extends PaymentModule
     /**
      * Save form data.
      */
-    protected function postProcess()
-    {
+    protected function postProcess() {
         $form_values = $this->getConfigFormValues();
 
         foreach (array_keys($form_values) as $key) {
@@ -259,8 +296,7 @@ class Onepay extends PaymentModule
     /**
     * Add the CSS & JavaScript files you want to be loaded in the BO.
     */
-    public function hookBackOfficeHeader()
-    {
+    public function hookBackOfficeHeader() {
         if (Tools::getValue('module_name') == $this->name) {
             $this->context->controller->addJS($this->_path.'views/js/back.js');
             $this->context->controller->addCSS($this->_path.'views/css/back.css');
@@ -270,51 +306,8 @@ class Onepay extends PaymentModule
     /**
      * Add the CSS & JavaScript files you want to be added on the FO.
      */
-    public function hookHeader()
-    {
+    public function hookHeader() {
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
-    }
-
-    /**
-     * This method is used to render the payment button,
-     * Take care if the button should be displayed or not.
-     */
-    public function hookPayment($params)
-    {
-        $currency_id = $params['cart']->id_currency;
-        $currency = new Currency((int)$currency_id);
-
-        if (in_array($currency->iso_code, $this->limited_currencies) == false)
-            return false;
-
-        $this->smarty->assign('module_dir', $this->_path);
-
-        return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
-    }
-
-    /**
-     * This hook is used to display the order confirmation page.
-     */
-    public function hookPaymentReturn($params)
-    {
-        if ($this->active == false)
-            return;
-
-        $order = $params['order'];
-
-        if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR'))
-            $this->smarty->assign('status', 'ok');
-
-        $this->smarty->assign(array(
-            'id_order' => $order->id,
-            'reference' => $order->reference,
-            'params' => $params,
-            'shop_name' => $this->context->shop->name,
-            'info' => json_decode(current(Message::getMessagesByOrderId($order->id, true))['message']),
-            'total' => Tools::displayPrice($order->getOrdersTotalPaid(), new Currency($order->id_currency), false),
-        ));
-
-        return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
     }
 }
