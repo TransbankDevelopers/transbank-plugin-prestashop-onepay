@@ -45,7 +45,7 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
                 $full_response = [];
                 $full_response['occ'] = $transactionCommitResponse->getOcc();
                 $full_response['externalUniqueNumber'] = $externalUniqueNumber;
-                $full_response['authorizationCode'] = $transactionCommitResponse->getOcc();
+                $full_response['authorizationCode'] = $transactionCommitResponse->getAuthorizationCode();
                 $full_response['buyOrder'] = $transactionCommitResponse->getBuyOrder();
                 $full_response['description'] = $transactionCommitResponse->getDescription();
                 $full_response['amount'] = $transactionCommitResponse->getAmount();
