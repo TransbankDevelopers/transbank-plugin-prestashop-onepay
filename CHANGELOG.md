@@ -4,6 +4,10 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.10] - 2019-05-06
+### Fixed
+- Corrige visualización de código de autorización, se mostraba un valor erroneo.
+
 ## [1.0.9] - 2018-12-10
 ### Fixed
 - Corrige bloqueo de otros medios de pago existentes cuando se activa el de Onepay.
