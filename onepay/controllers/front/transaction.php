@@ -34,6 +34,8 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
+            $ps_cart = $this->context->cart;
+
             $channel = isset($_POST['channel']) ? $_POST['channel'] : null;
             $endpoint = Configuration::get('ONEPAY_ENDPOINT', null);
             $apiKey = Configuration::get('ONEPAY_APIKEY', null);
@@ -43,9 +45,7 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
             OnepayBase::setApiKey($apiKey);
             OnepayBase::setSharedSecret($sharedSecret);
             OnepayBase::setCurrentIntegrationType($endpoint);
-            OnepayBase::setCallbackUrl($callbackUrl);
-            
-            $ps_cart = $this->context->cart;
+            OnepayBase::setCallbackUrl($callbackUrl . '&cart_id=' . $ps_cart->id);
 
             $ps_products = $ps_cart->getProducts(true);
 
@@ -85,7 +85,7 @@ class OnepayTransactionModuleFrontController extends ModuleFrontController
                     'issuedAt' => $transaction->getIssuedAt(),
                     'signature' => $transaction->getSignature(),
                     'amount' => $carro->getTotal(),
-                    'callbackUrl' => $callbackUrl
+                    'callbackUrl' => ($callbackUrl . '&cart_id=' . $ps_cart->id )
                 ]));
 
             } catch (TransbankException $transbank_exception) {
