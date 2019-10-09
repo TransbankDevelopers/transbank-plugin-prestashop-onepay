@@ -44,7 +44,6 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
                 $cart = new Cart((int)$cart_id);
                 $customer = new Customer((int)$cart->id_customer);
                 if (Context::getContext()->customer->secure_key == null) {
-                    $customer = new Customer((int)$cart->id_customer);
                     Context::getContext()->customer =  $customer;
                     $secure_key = $customer->secure_key;
                 } else {
@@ -67,7 +66,6 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
                     $message = json_encode($full_response);
 
                     $module_name = $this->module->displayName;
-                    $currency_id = (int)Context::getContext()->currency->id;
                     $this->module->validateOrder($cart_id, $payment_status, $cart->getOrderTotal(), $module_name, $message, array(), null, false, $secure_key);
 
                     $order_id = Order::getOrderByCartId((int)$cart->id);
