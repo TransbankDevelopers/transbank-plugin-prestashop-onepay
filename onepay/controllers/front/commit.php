@@ -37,10 +37,18 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
 
                 $transactionCommitResponse = Transaction::commit($occ, $externalUniqueNumber, $options);
 
-                $cart_id=Context::getContext()->cart->id;
-                $secure_key=Context::getContext()->customer->secure_key;
+                $cart_id = Tools::getValue('cart_id');
+                if($cart_id == null) {
+                    $cart_id=Context::getContext()->cart->id;
+                }
                 $cart = new Cart((int)$cart_id);
                 $customer = new Customer((int)$cart->id_customer);
+                if (Context::getContext()->customer->secure_key == null) {
+                    Context::getContext()->customer =  $customer;
+                    $secure_key = $customer->secure_key;
+                } else {
+                    $secure_key = Context::getContext()->customer->secure_key;
+                }
 
                 $full_response = [];
                 $full_response['occ'] = $transactionCommitResponse->getOcc();
@@ -58,8 +66,7 @@ class OnepayCommitModuleFrontController extends ModuleFrontController
                     $message = json_encode($full_response);
 
                     $module_name = $this->module->displayName;
-                    $currency_id = (int)Context::getContext()->currency->id;
-                    $this->module->validateOrder($cart_id, $payment_status, $cart->getOrderTotal(), $module_name, $message, array(), $currency_id, false, $secure_key);
+                    $this->module->validateOrder($cart_id, $payment_status, $cart->getOrderTotal(), $module_name, $message, array(), null, false, $secure_key);
 
                     $order_id = Order::getOrderByCartId((int)$cart->id);
                     if ($order_id && ($secure_key == $customer->secure_key)) {
